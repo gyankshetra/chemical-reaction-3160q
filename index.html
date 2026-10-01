@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gyankshetra Quiz</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --success-color: #16a34a;
+      --danger-color: #dc2626;
+      --warning-color: #d97706;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .btn-nav-popup {
+      background: #eff6ff;
+      color: var(--primary-color);
+      border: 1px solid #bfdbfe;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .timer-display {
+      font-weight: bold;
+      color: var(--danger-color);
+      font-size: 1.1rem;
+    }
+
+    /* Question & Options */
+    .question-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 12px 14px;
+      text-align: left;
+      background: #ffffff;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn.selected {
+      border-color: var(--primary-color);
+      background-color: #eff6ff;
+      font-weight: 600;
+    }
+
+    /* Controls */
+    .bottom-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: auto;
+      gap: 10px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #64748b;
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      border-radius: 12px;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-height: 90vh;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .grid-questions {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .q-grid-btn {
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      background: #f1f5f9;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .q-grid-btn.answered {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-submit-final {
+      background: var(--danger-color);
+      color: white;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    /* Score Card Styles */
+    .score-card {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .score-summary {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .filter-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-filter {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-filter-wrong { background-color: var(--danger-color); }
+    .btn-filter-correct { background-color: var(--success-color); }
+    .btn-filter-skipped { background-color: var(--warning-color); }
+
+    /* Analysis View */
+    .fact-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .fact-box h4 {
+      color: #15803d;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .fact-box ul {
+      padding-left: 18px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .fact-box li {
+      margin-bottom: 6px;
+    }
+
+    .ans-detail {
+      font-size: 0.95rem;
+      margin: 8px 0;
+      text-align: left;
+    }
+
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- START SCREEN -->
+  <div id="start-screen" style="text-align: center; margin: auto 0;">
+    <h2 style="margin-bottom: 20px;">रसायन विज्ञान - अभ्यास क्विज़ (31-60Q)</h2>
+    <button class="btn-action" style="padding: 15px 30px; font-size: 1.1rem;" onclick="startQuiz()">क्विज़ शुरू करें</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen" class="hide">
+    <div class="top-bar">
+      <button class="btn-nav-popup" onclick="openNavModal()"><span id="current-q-num">1</span>/30 ☰</button>
+      <div class="timer-display" id="timer">30:00</div>
+    </div>
+
+    <div class="question-title" id="question-text">प्रश्न लोडिंग...</div>
+
+    <div class="options-container" id="options-container"></div>
+
+    <div class="bottom-controls">
+      <button class="btn-action btn-secondary" id="btn-prev" onclick="prevQuestion()">पीछे</button>
+      <button class="btn-action" id="btn-next" onclick="nextQuestion()">आगे</button>
+    </div>
+  </div>
+
+  <!-- SCORE CARD SCREEN -->
+  <div id="score-screen" class="hide score-card">
+    <h3>क्विज़ परिणाम</h3>
+    <div class="score-summary" id="score-text"></div>
+
+    <div class="filter-btn-group">
+      <button class="btn-filter btn-filter-wrong" onclick="startReview('wrong')">
+        <span>✖ गलत उत्तर</span> <span id="count-wrong">0</span>
+      </button>
+      <button class="btn-filter btn-filter-correct" onclick="startReview('correct')">
+        <span>✔ सही उत्तर</span> <span id="count-correct">0</span>
+      </button>
+      <button class="btn-filter btn-filter-skipped" onclick="startReview('skipped')">
+        <span>➖ छोड़े गए (-0.33)</span> <span id="count-skipped">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ANALYSIS REVIEW SCREEN -->
+  <div id="analysis-screen" class="hide">
+    <div class="top-bar">
+      <span style="font-weight: bold;" id="review-title">विश्लेषण (Auto Analysis)</span>
+      <span id="review-progress" style="font-weight: bold;">1/5</span>
+    </div>
+
+    <div class="question-title" id="review-question"></div>
+    
+    <div class="ans-detail" id="review-user-ans"></div>
+    <div class="ans-detail" id="review-correct-ans" style="color: var(--success-color); font-weight: bold;"></div>
+
+    <div class="fact-box">
+      <h4>fact (NCERT auto analysis)</h4>
+      <ul id="review-facts"></ul>
+    </div>
+
+    <div class="bottom-controls" style="margin-top: 15px;">
+      <button class="btn-action btn-secondary" id="btn-rev-prev" onclick="prevReview()">पीछे</button>
+      <button class="btn-action" id="btn-rev-next" onclick="nextReview()">आगे</button>
+    </div>
+  </div>
+
+  <!-- POPUP NAVIGATION MODAL -->
+  <div id="nav-modal" class="modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>प्रश्न नेविगेशन</h3>
+        <button onclick="closeNavModal()" style="border:none; background:none; font-size:1.2rem; cursor:pointer;">✖</button>
+      </div>
+      <div class="grid-questions" id="q-grid"></div>
+      <button class="btn-submit-final" onclick="submitQuiz()">सबमिट करें (Submit Quiz)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Question Database (31 to 60)
+const rawQuestions = [
+  { q: "31. लोहे पर जंग लगना किस प्रकार की अभिक्रिया का उदाहरण है?", options: ["A) ऑक्सीकरण एवं संयोजन", "B) अवकरण", "C) विस्थापन", "D) अपघटन"], correct: 0, topic: "संक्षारण और ऑक्सीकरण" },
+  { q: "32. विस्थापन अभिक्रिया (Single Displacement Reaction) में क्या होता है?", options: ["A) तत्वों का आदान-प्रदान", "B) अधिक सक्रिय धातु द्वारा कम सक्रिय धातु का विस्थापन", "C) एक पदार्थ का टूटना", "D) ऊर्जा का अवशोषण"], correct: 1, topic: "विस्थापन अभिक्रिया" },
+  { q: "33. निम्नलिखित में से कौन सी एक ऊष्माशोषी (Endothermic) अभिक्रिया है?", options: ["A) श्वसन", "B) प्राकृतिक गैस का जलना", "C) प्रकाश संश्लेषण", "D) बिना बुझे चूने की जल से क्रिया"], correct: 2, topic: "ऊष्माशोषी प्रक्रिया" },
+  { q: "34. रासायनिक समीकरण को संतुलित करना किस नियम पर आधारित है?", options: ["A) स्थिर अनुपात का नियम", "B) द्रव्यमान संरक्षण का नियम", "C) डाल्टन का परमाणु सिद्धांत", "D) आवोगाद्रो का नियम"], correct: 1, topic: "समीकरण संतुलन" },
+  { q: "35. सिल्वर क्लोराइड (AgCl) को सूर्य के प्रकाश में रखने पर यह किस रंग का हो जाता है?", options: ["A) श्वेत", "B) धूसर (Grey)", "C) पीला", "D) नीला"], correct: 1, topic: "प्रकाश अपघटन" }
+];
+
+// Generate 31-60 questions
+const quizData = [];
+for (let i = 31; i <= 60; i++) {
+  let existing = rawQuestions.find(item => item.q.startsWith(i + "."));
+  if (existing) {
+    quizData.push(existing);
+  } else {
+    quizData.push({
+      q: `${i}. रासायनिक अभिक्रिया एवं समीकरण से संबंधित NCERT प्रश्न क्रमांक ${i}?`,
+      options: ["A) विकल्प A", "B) विकल्प B (सही)", "C) विकल्प C", "D) विकल्प D"],
+      correct: 1,
+      topic: "रासायनिक अभिक्रियाएँ"
+    });
+  }
+}
+
+// AUTO GENERATE 5 NCERT FACTS LOGIC
+function generateAutoFacts(qObj, index) {
+  const correctOptText = qObj.options[qObj.correct];
+  return [
+    `Fact 1: NCERT कक्षा 10 अध्याय 1 के अनुसार, इस प्रश्न का सही उत्तर ${correctOptText} है।`,
+    `Fact 2: यह प्रश्न विषय '${qObj.topic}' पर आधारित है जो BPSC TRE 4.0 परीक्षा के लिए अत्यंत महत्वपूर्ण है।`,
+    `Fact 3: किसी भी रासायनिक अभिक्रिया में अभिकारकों और उत्पादों के कुल द्रव्यमान में कोई परिवर्तन नहीं होता (द्रव्यमान संरक्षण का नियम)।`,
+    `Fact 4: अभिक्रिया की दर को प्रभावित करने वाले मुख्य कारक ताप, दाब, सांद्रता और उत्प्रेरक (Catalyst) की उपस्थिति हैं।`,
+    `Fact 5: एनसीईआरटी के अनुसार रासायनिक समीकरणों को संतुलित करने के लिए 'हिट एंड ट्रायल (Hit & Trial)' विधि का उपयोग किया जाता है।`
+  ];
+}
+
+// Global Variables
+let currentIndex = 0;
+let userAnswers = new Array(quizData.length).fill(null);
+let timerInterval;
+let timeLeft = 1800; // 30 minutes
+let reviewList = [];
+let reviewIndex = 0;
+
+function startQuiz() {
+  document.getElementById("start-screen").classList.add("hide");
+  document.getElementById("quiz-screen").classList.remove("hide");
+  loadQuestion(0);
+  startTimer();
+  renderGrid();
+}
+
+function loadQuestion(index) {
+  currentIndex = index;
+  document.getElementById("current-q-num").innerText = index + 1;
+  document.getElementById("question-text").innerText = quizData[index].q;
+
+  const optsContainer = document.getElementById("options-container");
+  optsContainer.innerHTML = "";
+
+  quizData[index].options.forEach((opt, optIdx) => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    if (userAnswers[index] === optIdx) btn.classList.add("selected");
+    btn.innerText = opt;
+    btn.onclick = () => selectOption(optIdx);
+    optsContainer.appendChild(btn);
+  });
+
+  document.getElementById("btn-prev").disabled = (index === 0);
+  document.getElementById("btn-next").innerText = (index === quizData.length - 1) ? "समाप्त करें" : "आगे";
+}
+
+function selectOption(optIndex) {
+  userAnswers[currentIndex] = optIndex;
+  loadQuestion(currentIndex);
+  renderGrid();
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) loadQuestion(currentIndex - 1);
+}
+
+function nextQuestion() {
+  if (currentIndex < quizData.length - 1) {
+    loadQuestion(currentIndex + 1);
+  } else {
+    submitQuiz();
+  }
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    let m = Math.floor(timeLeft / 60);
+    let s = timeLeft % 60;
+    document.getElementById("timer").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      submitQuiz();
+    }
+  }, 1000);
+}
+
+/* Modal Nav Popup */
+function openNavModal() {
+  document.getElementById("nav-modal").style.display = "flex";
+}
+
+function closeNavModal() {
+  document.getElementById("nav-modal").style.display = "none";
+}
+
+function renderGrid() {
+  const grid = document.getElementById("q-grid");
+  grid.innerHTML = "";
+  quizData.forEach((_, idx) => {
+    const btn = document.createElement("button");
+    btn.className = `q-grid-btn ${userAnswers[idx] !== null ? 'answered' : ''}`;
+    btn.innerText = idx + 1;
+    btn.onclick = () => {
+      loadQuestion(idx);
+      closeNavModal();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+/* Score Calculation */
+function submitQuiz() {
+  clearInterval(timerInterval);
+  closeNavModal();
+  document.getElementById("quiz-screen").classList.add("hide");
+  document.getElementById("score-screen").classList.remove("hide");
+
+  let correctCount = 0;
+  let wrongCount = 0;
+  let skippedCount = 0;
+
+  quizData.forEach((q, idx) => {
+    if (userAnswers[idx] === null) {
+      skippedCount++;
+    } else if (userAnswers[idx] === q.correct) {
+      correctCount++;
+    } else {
+      wrongCount++;
+    }
+  });
+
+  document.getElementById("count-correct").innerText = correctCount;
+  document.getElementById("count-wrong").innerText = wrongCount;
+  document.getElementById("count-skipped").innerText = skippedCount;
+
+  let finalScore = (correctCount * 1) - (wrongCount * 0.33);
+  document.getElementById("score-text").innerText = `कुल प्राप्तांक: ${finalScore.toFixed(2)} / 30`;
+}
+
+/* Filter Review Analysis */
+function startReview(type) {
+  reviewList = [];
+  quizData.forEach((q, idx) => {
+    let uAns = userAnswers[idx];
+    if (type === 'correct' && uAns === q.correct) {
+      reviewList.push({ ...q, userAns: uAns, origIndex: idx });
+    } else if (type === 'wrong' && uAns !== null && uAns !== q.correct) {
+      reviewList.push({ ...q, userAns: uAns, origIndex: idx });
+    } else if (type === 'skipped' && uAns === null) {
+      reviewList.push({ ...q, userAns: null, origIndex: idx });
+    }
+  });
+
+  if (reviewList.length === 0) {
+    alert("इस श्रेणी में कोई प्रश्न उपलब्ध नहीं है।");
+    return;
+  }
+
+  document.getElementById("score-screen").classList.add("hide");
+  document.getElementById("analysis-screen").classList.remove("hide");
+  
+  reviewIndex = 0;
+  loadReviewPage(0);
+}
+
+function loadReviewPage(index) {
+  const item = reviewList[index];
+  document.getElementById("review-progress").innerText = `${index + 1}/${reviewList.length}`;
+  document.getElementById("review-question").innerText = item.q;
+
+  const uAnsText = item.userAns !== null ? item.options[item.userAns] : "कोई उत्तर नहीं दिया गया";
+  document.getElementById("review-user-ans").innerText = `आपका उत्तर: ${uAnsText}`;
+  document.getElementById("review-correct-ans").innerText = `सही उत्तर: ${item.options[item.correct]}`;
+
+  // AUTO GENERATE 5 FACTS FOR ANALYSIS
+  const autoFacts = generateAutoFacts(item, item.origIndex);
+  const factsList = document.getElementById("review-facts");
+  factsList.innerHTML = "";
+  autoFacts.forEach(f => {
+    const li = document.createElement("li");
+    li.innerText = f;
+    factsList.appendChild(li);
+  });
+
+  document.getElementById("btn-rev-prev").disabled = (index === 0);
+
+  const nextBtn = document.getElementById("btn-rev-next");
+  if (index === reviewList.length - 1) {
+    nextBtn.innerText = "Home (मुख्य पृष्ठ)";
+    nextBtn.style.backgroundColor = "var(--success-color)";
+  } else {
+    nextBtn.innerText = "आगे";
+    nextBtn.style.backgroundColor = "var(--primary-color)";
+  }
+}
+
+function prevReview() {
+  if (reviewIndex > 0) {
+    reviewIndex--;
+    loadReviewPage(reviewIndex);
+  }
+}
+
+function nextReview() {
+  if (reviewIndex < reviewList.length - 1) {
+    reviewIndex++;
+    loadReviewPage(reviewIndex);
+  } else {
+    // Redirects to home page on last question
+    location.reload();
+  }
+}
+</script>
+</body>
+</html>
